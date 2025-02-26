@@ -277,6 +277,37 @@
   
 
   
+    <div id="giscus_thread" style="max-width: 1200px; margin: 0 auto;">
+  
+    <script>
+      let giscusTheme = determineComputedTheme();
+      let giscusAttributes = {
+        src: 'https://giscus.app/client.js',
+        'data-repo': 'happyZYM/MainPageCompiled',
+        'data-repo-id': 'R_kgDONtx2zw',
+        'data-category': 'Comments',
+        'data-category-id': 'DIC_kwDONtx2z84Cm-36',
+        'data-mapping': 'pathname',
+        'data-strict': '1',
+        'data-reactions-enabled': '1',
+        'data-emit-metadata': '0',
+        'data-input-position': 'top',
+        'data-theme': giscusTheme,
+        'data-lang': 'zh-CN',
+        crossorigin: 'anonymous',
+        async: '',
+      };
+
+      let giscusScript = document.createElement('script');
+      Object.entries(giscusAttributes).forEach(([key, value]) => giscusScript.setAttribute(key, value));
+      document.getElementById('giscus_thread').appendChild(giscusScript);
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://giscus.app/?ref_noscript" rel="external nofollow noopener" target="_blank">comments powered by giscus.</a>
+</noscript>
+  
+</div>
+
+  
 </div>
 
       
@@ -293,7 +324,7 @@
 
       
       
-        Last updated: February 20, 2025.
+        Last updated: February 26, 2025.
       
     </div>
   </footer>
