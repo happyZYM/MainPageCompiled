@@ -272,6 +272,33 @@
   <article>
     <p>项目地址：<a href="https://github.com/happyZYM/mcp-server-reposearch" rel="external nofollow noopener" target="_blank">https://github.com/happyZYM/mcp-server-reposearch</a></p>
 
+<p>这是一个 mcp 服务器，提供比 Cline 内置的 <code class="language-plaintext highlighter-rouge">search_files</code> 工具更好的内容搜索功能。</p>
+
+<p>功能特性：</p>
+
+<ul class="task-list">
+  <li class="task-list-item">
+<input type="checkbox" class="task-list-item-checkbox" disabled checked>通过 <code class="language-plaintext highlighter-rouge">.reposearchignore</code> 文件控制过滤，使用 gitignore 格式</li>
+  <li class="task-list-item">
+<input type="checkbox" class="task-list-item-checkbox" disabled checked>支持正则表达式搜索</li>
+  <li class="task-list-item">输出格式控制：
+    <ul class="task-list">
+      <li class="task-list-item">
+<input type="checkbox" class="task-list-item-checkbox" disabled checked>是否在结果中包含内容</li>
+      <li class="task-list-item">
+<input type="checkbox" class="task-list-item-checkbox" disabled>包含上下文行</li>
+    </ul>
+  </li>
+  <li class="task-list-item">
+<input type="checkbox" class="task-list-item-checkbox" disabled checked>防止 tokens 爆炸</li>
+</ul>
+
+<p>注意事项：</p>
+
+<ul>
+  <li>目前需要在系统提示中告诉 Cline 停止使用 <code class="language-plaintext highlighter-rouge">search_files</code> 工具，否则它会优先使用 <code class="language-plaintext highlighter-rouge">search_files</code> 工具。</li>
+</ul>
+
   </article>
 
   
@@ -324,7 +351,7 @@
 
       
       
-        Last updated: March 19, 2025.
+        Last updated: April 11, 2025.
       
     </div>
   </footer>
