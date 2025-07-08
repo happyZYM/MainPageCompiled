@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="cn"><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://zhuangyumin.dev/feed.xml" rel="self" type="application/atom+xml" /><link href="https://zhuangyumin.dev/" rel="alternate" type="text/html" hreflang="cn" /><updated>2025-07-07T09:51:53+00:00</updated><id>https://zhuangyumin.dev/feed.xml</id><title type="html">blank</title><subtitle>ZYM&apos;s main page.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="cn"><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://zhuangyumin.dev/feed.xml" rel="self" type="application/atom+xml" /><link href="https://zhuangyumin.dev/" rel="alternate" type="text/html" hreflang="cn" /><updated>2025-07-08T10:50:14+00:00</updated><id>https://zhuangyumin.dev/feed.xml</id><title type="html">blank</title><subtitle>ZYM&apos;s main page.
 </subtitle><entry><title type="html">Linux内核魔改日寄</title><link href="https://zhuangyumin.dev/blog/2025/StrangeLinux/" rel="alternate" type="text/html" title="Linux内核魔改日寄" /><published>2025-02-19T00:00:00+00:00</published><updated>2025-02-19T00:00:00+00:00</updated><id>https://zhuangyumin.dev/blog/2025/StrangeLinux</id><content type="html" xml:base="https://zhuangyumin.dev/blog/2025/StrangeLinux/"><![CDATA[<p><del>说是小作业其实是10+个小作业</del></p>
 
 <p>项目地址：<a href="https://github.com/happyZYM/StrangeLinux">https://github.com/happyZYM/StrangeLinux</a></p>
@@ -6,6 +6,8 @@
 <h1 id="1-boot">1. Boot</h1>
 
 <h2 id="11-read-acpi-table">1.1 Read ACPI Table</h2>
+
+<p>这一部分的主要工作量在于研究ACPI的手册</p>
 
 <h2 id="12-hack-acpi-table">1.2 Hack ACPI Table</h2>
 
@@ -68,5 +70,5 @@
 
 <p>文档中的程序源代码、运行时环境和数据可以在<a href="https://dev.zymsite.ink/Academic/PiCalculator">https://dev.zymsite.ink/Academic/PiCalculator</a>找到，C++重制版见<a href="https://dev.zymsite.ink/Academic/PiCalculator/PiCalculatorCpp/">https://dev.zymsite.ink/Academic/PiCalculator/PiCalculatorCpp/</a></p>
 
-<style> .pdf-embed-wrap-2986bcb4-9fe8-486d-bbbd-8e8ffe153b8f { display: flex; flex-direction: column; width: 100%; height: 650px; } .pdf-embed-container-2986bcb4-9fe8-486d-bbbd-8e8ffe153b8f { height: 100%; } .pdf-link-2986bcb4-9fe8-486d-bbbd-8e8ffe153b8f { background-color: white; text-align: center; border-style: solid; } .pdf-embed-container-2986bcb4-9fe8-486d-bbbd-8e8ffe153b8f iframe { width: 100%; height: 100%; } </style>
-<div class="pdf-embed-wrap-2986bcb4-9fe8-486d-bbbd-8e8ffe153b8f"> <div class="pdf-link-2986bcb4-9fe8-486d-bbbd-8e8ffe153b8f"> <a href="/assets/pdf/圆周率近似值的计算v1.1.0.0.pdf" target="_blank">View PDF</a> </div> <div class="pdf-embed-container-2986bcb4-9fe8-486d-bbbd-8e8ffe153b8f"> <iframe src="/assets/pdf/圆周率近似值的计算v1.1.0.0.pdf" frameborder="0" allowfullscreen=""></iframe> </div> </div>]]></content><author><name></name></author><category term="Math" /><category term="数值计算" /><summary type="html"><![CDATA[突发奇想写了个这个主题，本来以为拉马努金公式已经是最快的了，结果一搜索发现自己想当然了，于是仔细查找了一下资料]]></summary></entry></feed>
+<style> .pdf-embed-wrap-10d471bb-620c-4cc3-84ab-a2c8f04a32f1 { display: flex; flex-direction: column; width: 100%; height: 650px; } .pdf-embed-container-10d471bb-620c-4cc3-84ab-a2c8f04a32f1 { height: 100%; } .pdf-link-10d471bb-620c-4cc3-84ab-a2c8f04a32f1 { background-color: white; text-align: center; border-style: solid; } .pdf-embed-container-10d471bb-620c-4cc3-84ab-a2c8f04a32f1 iframe { width: 100%; height: 100%; } </style>
+<div class="pdf-embed-wrap-10d471bb-620c-4cc3-84ab-a2c8f04a32f1"> <div class="pdf-link-10d471bb-620c-4cc3-84ab-a2c8f04a32f1"> <a href="/assets/pdf/圆周率近似值的计算v1.1.0.0.pdf" target="_blank">View PDF</a> </div> <div class="pdf-embed-container-10d471bb-620c-4cc3-84ab-a2c8f04a32f1"> <iframe src="/assets/pdf/圆周率近似值的计算v1.1.0.0.pdf" frameborder="0" allowfullscreen=""></iframe> </div> </div>]]></content><author><name></name></author><category term="Math" /><category term="数值计算" /><summary type="html"><![CDATA[突发奇想写了个这个主题，本来以为拉马努金公式已经是最快的了，结果一搜索发现自己想当然了，于是仔细查找了一下资料]]></summary></entry></feed>
