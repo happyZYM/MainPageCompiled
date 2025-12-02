@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
-<loc>https://zhuangyumin.dev/books/the_godfather/</loc>
-<lastmod>2025-12-02T11:13:52+00:00</lastmod>
-</url>
-<url>
 <loc>https://zhuangyumin.dev/news/1/</loc>
 <lastmod>2023-07-01T00:00:00+00:00</lastmod>
 </url>
@@ -33,30 +29,6 @@
 </url>
 <url>
 <loc>https://zhuangyumin.dev/teaching/</loc>
-</url>
-<url>
-<loc>https://zhuangyumin.dev/books/2025/</loc>
-</url>
-<url>
-<loc>https://zhuangyumin.dev/books/tag/top-100/</loc>
-</url>
-<url>
-<loc>https://zhuangyumin.dev/books/category/classics/</loc>
-</url>
-<url>
-<loc>https://zhuangyumin.dev/books/category/crime/</loc>
-</url>
-<url>
-<loc>https://zhuangyumin.dev/books/category/historical-fiction/</loc>
-</url>
-<url>
-<loc>https://zhuangyumin.dev/books/category/mystery/</loc>
-</url>
-<url>
-<loc>https://zhuangyumin.dev/books/category/novels/</loc>
-</url>
-<url>
-<loc>https://zhuangyumin.dev/books/category/thriller/</loc>
 </url>
 <url>
 <loc>https://zhuangyumin.dev/blog/</loc>

@@ -44,12 +44,7 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/news/";
           },
-        },{id: "books-the-godfather",
-          title: 'The Godfather',
-          description: "",
-          section: "Books",handler: () => {
-              window.location.href = "/books/the_godfather/";
-            },},{id: "news-i-was-admitted-to-acm-honors-class",
+        },{id: "news-i-was-admitted-to-acm-honors-class",
           title: 'I was admitted to ACM Honors Class.',
           description: "",
           section: "News",},{id: "news-joined-gair-lab-as-an-undergraduate-research-intern",
