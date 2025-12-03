@@ -44,9 +44,9 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/news/";
           },
-        },{id: "post-在accelerate框架中精确恢复dataloader状态",
+        },{id: "post-在accelerate框架中精确恢复dataloader状态的方法",
         
-          title: "在accelerate框架中精确恢复dataloader状态",
+          title: "在accelerate框架中精确恢复dataloader状态的方法",
         
         description: "",
         section: "Posts",
