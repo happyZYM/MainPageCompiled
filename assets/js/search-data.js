@@ -44,7 +44,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/news/";
           },
-        },{id: "news-i-was-admitted-to-acm-honors-class",
+        },{id: "post-在accelerate框架中精确恢复dataloader状态",
+        
+          title: "在accelerate框架中精确恢复dataloader状态",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/accelerate-dataloader-accurate-resuming/";
+          
+        },
+      },{id: "news-i-was-admitted-to-acm-honors-class",
           title: 'I was admitted to ACM Honors Class.',
           description: "",
           section: "News",},{id: "news-joined-gair-lab-as-an-undergraduate-research-intern",
