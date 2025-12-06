@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="cn"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://zhuangyumin.dev/feed.xml" rel="self" type="application/atom+xml" /><link href="https://zhuangyumin.dev/" rel="alternate" type="text/html" hreflang="cn" /><updated>2025-12-03T08:00:13+00:00</updated><id>https://zhuangyumin.dev/feed.xml</id><title type="html">blank</title><subtitle>ZYM&apos;s main page.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="cn"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://zhuangyumin.dev/feed.xml" rel="self" type="application/atom+xml" /><link href="https://zhuangyumin.dev/" rel="alternate" type="text/html" hreflang="cn" /><updated>2025-12-06T01:44:31+00:00</updated><id>https://zhuangyumin.dev/feed.xml</id><title type="html">blank</title><subtitle>ZYM&apos;s main page.
 </subtitle><entry><title type="html">在accelerate框架中精确恢复dataloader状态的方法</title><link href="https://zhuangyumin.dev/blog/2025/accelerate-dataloader-accurate-resuming/" rel="alternate" type="text/html" title="在accelerate框架中精确恢复dataloader状态的方法" /><published>2025-12-03T00:00:00+00:00</published><updated>2025-12-03T00:00:00+00:00</updated><id>https://zhuangyumin.dev/blog/2025/accelerate-dataloader-accurate-resuming</id><content type="html" xml:base="https://zhuangyumin.dev/blog/2025/accelerate-dataloader-accurate-resuming/"><![CDATA[<h1 id="各类方案的比对分析">各类方案的比对分析</h1>
 
 <p>不难发现，在使用accelerate框架时，<code class="language-plaintext highlighter-rouge">accelerator.load_state</code>只能可靠地恢复model、optimizer、scheduler的状态，而dataloader的状态恢复，里面有许多坑。</p>
@@ -18,7 +18,7 @@
 
 <ul>
   <li>Stateful Dataloader: accelerate虽然声称支持新版torchdata里的StatefulDataloader，但是issue里有大量反馈存在各种兼容性bug。（我自己也碰到过这种兼容性bug，虽然甚至连怎么不兼容都无法准确复现）</li>
-  <li>skip_first_batches: <code class="language-plaintext highlighter-rouge">accelerator.skip_first_batches</code>方案看起来稍微好一点，但是实质上和纯手动skip相同，因此同样无法解决随机环境无法复现的问题。同时，“是否会改变传入dataloader的内部状态”可能有一些问题：按照官方文档，传入的dataloader不会改变，输出的是一个独立拷贝，因此在下一个完整epoch开始时，需要切换回原始dataloader，但是我遇到了“下一个完整epoch同样被截短”的情况（尚未查明原因，并且没有在更简单的样例中复现）。曾经有一个issue讨论过这个问题，并且有一个PR声称要改成无需切换dataloader，dataloader自己自动变化，但最终没有这样修改。（参考<a href="https://github.com/huggingface/accelerate/issues/1451">https://github.com/huggingface/accelerate/issues/1451</a>，<a href="https://github.com/huggingface/accelerate/pull/1466">https://github.com/huggingface/accelerate/pull/1466</a>）</li>
+  <li>skip_first_batches: <code class="language-plaintext highlighter-rouge">accelerator.skip_first_batches</code>方案看起来稍微好一点，但是实质上和纯手动skip相同，因此同样无法解决随机环境无法复现的问题。</li>
 </ul>
 
 <p>在使用deepwiki查看源码，以及浏览了issue <a href="https://github.com/huggingface/accelerate/issues/3242">https://github.com/huggingface/accelerate/issues/3242</a> 之后，我发现<code class="language-plaintext highlighter-rouge">use_seedable_sampler</code>是一个比较好的方案。虽然 <a href="https://github.com/huggingface/accelerate/issues/3398">https://github.com/huggingface/accelerate/issues/3398</a> 声称这个也有bug，不过我在<code class="language-plaintext highlighter-rouge">v1.11.0</code>里面没有复现，可能已被某个PR修复。（并且这个方案的原理相当简单可靠，没有过于明显的bug之后应该不至于撞上什么特例）</p>
@@ -322,21 +322,6 @@ Epoch 2:
 Epoch 3:
 [[6], [3], [5], [7], [1]]
 </code></pre>
-
-<p>可以看出普通DataLoader+skip_first_batches不可能正确恢复非第一个epoch的情况，不过也没有复现我的训练程序里第二个epoch也触发跳过的bug。我的代码片段：</p>
-
-<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">starting_epoch</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">num_train_epochs</span><span class="p">):</span>
-        <span class="n">current_train_dataloader</span> <span class="o">=</span> <span class="n">train_dataloader</span>
-        <span class="k">if</span> <span class="n">epoch</span> <span class="o">==</span> <span class="n">starting_epoch</span> <span class="ow">and</span> <span class="n">starting_global_step_in_epoch</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">current_train_dataloader</span> <span class="o">=</span> <span class="n">accelerator</span><span class="p">.</span><span class="nf">skip_first_batches</span><span class="p">(</span>
-                <span class="n">train_dataloader</span><span class="p">,</span>
-                <span class="n">starting_global_step_in_epoch</span> <span class="o">*</span> <span class="n">args</span><span class="p">.</span><span class="n">gradient_accumulation_steps</span>
-            <span class="p">)</span>
-        <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">current_train_dataloader</span><span class="p">):</span>
-            <span class="c1"># Break if we've reached max steps
-</span>            <span class="k">if</span> <span class="n">global_step</span> <span class="o">&gt;=</span> <span class="n">args</span><span class="p">.</span><span class="n">max_train_steps</span><span class="p">:</span>
-                <span class="k">break</span>
-</code></pre></div></div>
 
 <h2 id="test-3">Test 3</h2>
 
@@ -651,4 +636,163 @@ Epoch 3:
 [[2], [3], [7], [1], [5]]
 </code></pre>
 
-<p>可以看出<code class="language-plaintext highlighter-rouge">use_seedable_sampler</code>是正常的</p>]]></content><author><name></name></author><category term="ComputerScience" /><category term="Engineer" /><summary type="html"><![CDATA[各类方案的比对分析]]></summary></entry></feed>
+<p>可以看出<code class="language-plaintext highlighter-rouge">use_seedable_sampler</code>是正常的</p>
+
+<h2 id="test-5">Test 5</h2>
+<p>对于程序：</p>
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">torch</span>
+<span class="kn">from</span> <span class="n">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">Dataset</span>
+
+<span class="kn">from</span> <span class="n">accelerate</span> <span class="kn">import</span> <span class="n">Accelerator</span>
+<span class="kn">from</span> <span class="n">accelerate.utils</span> <span class="kn">import</span> <span class="n">set_seed</span><span class="p">,</span> <span class="n">DataLoaderConfiguration</span>
+<span class="kn">import</span> <span class="n">os</span>
+
+<span class="c1"># from torchdata.stateful_dataloader import StatefulDataLoader
+</span>
+<span class="c1"># Simple dataset with 10 elements
+</span><span class="k">class</span> <span class="nc">SimpleDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="nf">list</span><span class="p">(</span><span class="nf">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+<span class="c1"># Function to print batch order in an epoch
+</span><span class="k">def</span> <span class="nf">print_epoch_batches</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">dataloader</span><span class="p">,</span> <span class="n">interrupt</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">--- Process </span><span class="si">{</span><span class="n">accelerator</span><span class="p">.</span><span class="n">process_index</span><span class="si">}</span><span class="s"> ---</span><span class="se">\n</span><span class="sh">"</span>
+    <span class="n">output</span> <span class="o">+=</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Epoch </span><span class="si">{</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s">:</span><span class="se">\n</span><span class="sh">"</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">dataloader</span><span class="p">):</span>
+        <span class="n">data</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">batch</span><span class="p">.</span><span class="nf">tolist</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">interrupt</span> <span class="ow">and</span> <span class="n">epoch</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">accelerator</span><span class="p">.</span><span class="nf">save_state</span><span class="p">(</span><span class="n">output_dir</span><span class="o">=</span><span class="sh">"</span><span class="s">debug_data_order_checkpoints</span><span class="sh">"</span><span class="p">)</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Random state saved</span><span class="se">\n</span><span class="sh">"</span>
+    <span class="n">output</span> <span class="o">+=</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="se">\n</span><span class="sh">"</span>
+    <span class="k">return</span> <span class="n">output</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">dataloader_config</span> <span class="o">=</span> <span class="nc">DataLoaderConfiguration</span><span class="p">(</span>
+        <span class="n">use_stateful_dataloader</span><span class="o">=</span><span class="bp">True</span>
+    <span class="p">)</span>
+    <span class="n">accelerator</span> <span class="o">=</span> <span class="nc">Accelerator</span><span class="p">(</span>
+        <span class="n">dataloader_config</span><span class="o">=</span><span class="n">dataloader_config</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="nf">set_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+
+    <span class="c1"># Create the dataset and DataLoader with shuffle=True
+</span>    <span class="n">dataset</span> <span class="o">=</span> <span class="nc">SimpleDataset</span><span class="p">()</span>
+    <span class="n">dataloader</span> <span class="o">=</span> <span class="nc">DataLoader</span><span class="p">(</span>
+        <span class="n">dataset</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">shuffle</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">dataloader</span> <span class="o">=</span> <span class="n">accelerator</span><span class="p">.</span><span class="nf">prepare</span><span class="p">(</span><span class="n">dataloader</span><span class="p">)</span>
+
+    <span class="c1"># Check data order for 3 epochs
+</span>    <span class="n">all_outputs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="n">epoch_output</span> <span class="o">=</span> <span class="nf">print_epoch_batches</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">dataloader</span><span class="p">,</span> <span class="n">interrupt</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">all_outputs</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">epoch_output</span><span class="p">)</span>
+
+    <span class="c1"># Print all outputs at the end
+</span>    <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">all_outputs</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="n">accelerator</span><span class="p">.</span><span class="nf">wait_for_everyone</span><span class="p">()</span>
+
+    <span class="c1"># Resume from checkpoint
+</span>    <span class="n">accelerator</span> <span class="o">=</span> <span class="nc">Accelerator</span><span class="p">(</span>
+        <span class="n">dataloader_config</span><span class="o">=</span><span class="n">dataloader_config</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="nf">set_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+    <span class="n">dataloader</span> <span class="o">=</span> <span class="nc">DataLoader</span><span class="p">(</span>
+        <span class="n">dataset</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">shuffle</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">dataloader</span> <span class="o">=</span> <span class="n">accelerator</span><span class="p">.</span><span class="nf">prepare</span><span class="p">(</span><span class="n">dataloader</span><span class="p">)</span>
+
+    <span class="c1"># Load random state
+</span>    <span class="k">if</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="nf">exists</span><span class="p">(</span><span class="sh">"</span><span class="s">debug_data_order_checkpoints</span><span class="sh">"</span><span class="p">):</span>
+        <span class="n">accelerator</span><span class="p">.</span><span class="nf">load_state</span><span class="p">(</span><span class="sh">"</span><span class="s">debug_data_order_checkpoints</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Random state loaded from debug_data_order_checkpoints</span><span class="sh">"</span><span class="p">)</span>
+
+    <span class="c1"># skip_dataloader = accelerator.skip_first_batches(dataloader, 2)
+</span>
+    <span class="c1"># Check data order for 1 epoch
+</span>    <span class="n">all_outputs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span>
+        <span class="n">current_dataloader</span> <span class="o">=</span> <span class="n">dataloader</span>
+        <span class="k">if</span> <span class="n">epoch</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># skip first 2 batches in epoch 2
+</span>            <span class="n">current_dataloader</span> <span class="o">=</span> <span class="n">accelerator</span><span class="p">.</span><span class="nf">skip_first_batches</span><span class="p">(</span><span class="n">dataloader</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">epoch_output</span> <span class="o">=</span> <span class="nf">print_epoch_batches</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">current_dataloader</span><span class="p">)</span>
+        <span class="n">all_outputs</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">epoch_output</span><span class="p">)</span>
+
+    <span class="c1"># Print all outputs at the end
+</span>    <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">all_outputs</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>运行<code class="language-plaintext highlighter-rouge">accelerate launch --multi_gpu --num_processes 2 a.py</code>，输出</p>
+
+<pre><code class="language-txt">--- Process 1 ---
+Epoch 1:
+[[2], [9], [7], [3], [6]]
+
+
+--- Process 1 ---
+Epoch 2:
+Random state saved
+[[2], [8], [4], [9], [0]]
+
+
+--- Process 1 ---
+Epoch 3:
+[[4], [0], [8], [6], [5]]
+
+
+--- Process 0 ---
+Epoch 1:
+[[4], [8], [1], [0], [5]]
+
+
+--- Process 0 ---
+Epoch 2:
+Random state saved
+[[6], [3], [5], [7], [1]]
+
+
+--- Process 0 ---
+Epoch 3:
+[[3], [9], [1], [7], [2]]
+
+Random state loaded from debug_data_order_checkpoints
+Random state loaded from debug_data_order_checkpoints
+
+--- Process 1 ---
+Epoch 2:
+[[7], [3], [6]]
+
+
+--- Process 1 ---
+Epoch 3:
+[[8], [4], [9], [0]]
+
+
+--- Process 0 ---
+Epoch 2:
+[[1], [0], [5]]
+
+
+--- Process 0 ---
+Epoch 3:
+[[3], [5], [7], [1]]
+</code></pre>
+
+<p>可以发现Stateful Dataloader与skip_first_batches这类方法<strong>不兼容</strong>，会导致第二个epoch也有内容被跳过</p>]]></content><author><name></name></author><category term="ComputerScience" /><category term="Engineer" /><summary type="html"><![CDATA[各类方案的比对分析]]></summary></entry></feed>
